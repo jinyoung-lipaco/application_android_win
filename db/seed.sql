@@ -22,12 +22,12 @@ INSERT INTO month_groups (name, min_months, max_months, sort_order) VALUES
 
 -- Demo users (password: test1234 = bcrypt hash)
 INSERT INTO users (email, password_hash, nickname, avatar, avatar_gradient, tier, star_chips) VALUES
-('haeun@test.com', '$2a$10$xVqYLGQhHw3UDODqxOfxCu6FKCzCRRSHftWYpWaIzHGvHgGqK8W5G', '하은맘', '🐥', 'g1', '별맘', 1250),
-('seoyeon@test.com', '$2a$10$xVqYLGQhHw3UDODqxOfxCu6FKCzCRRSHftWYpWaIzHGvHgGqK8W5G', '서연맘', '👶', 'g2', '별똥별맘', 3200),
-('minjun@test.com', '$2a$10$xVqYLGQhHw3UDODqxOfxCu6FKCzCRRSHftWYpWaIzHGvHgGqK8W5G', '민준맘', '🦊', 'g3', '인증단', 5100),
-('sua@test.com', '$2a$10$xVqYLGQhHw3UDODqxOfxCu6FKCzCRRSHftWYpWaIzHGvHgGqK8W5G', '수아맘', '🐰', 'g1', '새싹맘', 450),
-('hayun@test.com', '$2a$10$xVqYLGQhHw3UDODqxOfxCu6FKCzCRRSHftWYpWaIzHGvHgGqK8W5G', '하윤맘', '🌸', 'g4', '별맘', 980),
-('jiwoo@test.com', '$2a$10$xVqYLGQhHw3UDODqxOfxCu6FKCzCRRSHftWYpWaIzHGvHgGqK8W5G', '지우맘', '🌱', 'g2', '새싹맘', 320);
+('haeun@test.com', '$2a$10$Px9LamvxLNID85lzdUyLeewC1YQNsYovlt.RdvwqmB2Olm67ykv5S', '하은맘', '🐥', 'g1', '별맘', 1250),
+('seoyeon@test.com', '$2a$10$Px9LamvxLNID85lzdUyLeewC1YQNsYovlt.RdvwqmB2Olm67ykv5S', '서연맘', '👶', 'g2', '별똥별맘', 3200),
+('minjun@test.com', '$2a$10$Px9LamvxLNID85lzdUyLeewC1YQNsYovlt.RdvwqmB2Olm67ykv5S', '민준맘', '🦊', 'g3', '인증단', 5100),
+('sua@test.com', '$2a$10$Px9LamvxLNID85lzdUyLeewC1YQNsYovlt.RdvwqmB2Olm67ykv5S', '수아맘', '🐰', 'g1', '새싹맘', 450),
+('hayun@test.com', '$2a$10$Px9LamvxLNID85lzdUyLeewC1YQNsYovlt.RdvwqmB2Olm67ykv5S', '하윤맘', '🌸', 'g4', '별맘', 980),
+('jiwoo@test.com', '$2a$10$Px9LamvxLNID85lzdUyLeewC1YQNsYovlt.RdvwqmB2Olm67ykv5S', '지우맘', '🌱', 'g2', '새싹맘', 320);
 
 -- Children
 INSERT INTO children (user_id, name, birth_date, gender) VALUES

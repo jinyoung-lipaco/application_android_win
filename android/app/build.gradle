@@ -34,13 +34,13 @@ android {
         }
         docker {
             dimension "environment"
-            // Change this to your Docker server IP (e.g. "http://192.168.0.10:4000/prototype.html")
-            buildConfigField "String", "DEFAULT_URL", "\"http://10.0.2.2:4000/prototype.html\""
+            // Local network IP for real phone testing
+            buildConfigField "String", "DEFAULT_URL", "\"http://172.30.1.20:4000/prototype.html\""
             manifestPlaceholders = [
-                hostName    : "10.0.2.2",
-                defaultUrl  : "http://10.0.2.2:4000/prototype.html",
+                hostName    : "172.30.1.20",
+                defaultUrl  : "http://172.30.1.20:4000/prototype.html",
                 launcherName: "소행성",
-                assetStatements: '[{ "relation": ["delegate_permission/common.handle_all_urls"], "target": { "namespace": "web", "site": "http://10.0.2.2:4000" } }]'
+                assetStatements: '[{ "relation": ["delegate_permission/common.handle_all_urls"], "target": { "namespace": "web", "site": "http://172.30.1.20:4000" } }]'
             ]
         }
     }
