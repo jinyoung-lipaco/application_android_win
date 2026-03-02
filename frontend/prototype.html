@@ -6739,7 +6739,7 @@ if('serviceWorker' in navigator){
     const el = document.createElement('div');
     el.id = 's-auth';
     el.className = 'screen';
-    el.style.cssText = 'display:none;background:var(--bg);';
+    el.style.cssText = 'display:none;background:var(--bg);position:absolute;inset:0;z-index:100;pointer-events:auto;overflow-y:auto;';
     el.innerHTML = `
       <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;">
         <div style="font-size:48px;margin-bottom:8px;">☄️</div>
@@ -6747,8 +6747,8 @@ if('serviceWorker' in navigator){
         <div style="font-size:13px;color:var(--sub);margin-bottom:32px;">엄마들이 함께 만들어가는 육아 커뮤니티</div>
 
         <div id="auth-login-form" style="width:100%;max-width:320px;">
-          <input id="auth-email" type="email" placeholder="이메일" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:10px;font-size:14px;outline:none;background:var(--card);">
-          <input id="auth-pass" type="password" placeholder="비밀번호" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:16px;font-size:14px;outline:none;background:var(--card);">
+          <input id="auth-email" type="email" placeholder="이메일" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:10px;font-size:16px;outline:none;background:var(--card);-webkit-user-select:text;user-select:text;touch-action:auto;-webkit-appearance:none;">
+          <input id="auth-pass" type="password" placeholder="비밀번호" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:16px;font-size:16px;outline:none;background:var(--card);-webkit-user-select:text;user-select:text;touch-action:auto;-webkit-appearance:none;">
           <div id="auth-error" style="color:#e74c3c;font-size:12px;margin-bottom:10px;display:none;text-align:center;"></div>
           <button id="auth-login-btn" style="width:100%;padding:14px;background:var(--pri);color:#fff;border:none;border-radius:var(--r-md);font-size:15px;font-weight:600;cursor:pointer;">로그인</button>
           <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--sub);">
@@ -6760,10 +6760,10 @@ if('serviceWorker' in navigator){
         </div>
 
         <div id="auth-register-form" style="width:100%;max-width:320px;display:none;">
-          <input id="reg-email" type="email" placeholder="이메일" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:10px;font-size:14px;outline:none;background:var(--card);">
-          <input id="reg-nick" type="text" placeholder="닉네임 (예: 하은맘)" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:10px;font-size:14px;outline:none;background:var(--card);">
-          <input id="reg-pass" type="password" placeholder="비밀번호 (6자 이상)" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:10px;font-size:14px;outline:none;background:var(--card);">
-          <input id="reg-child-birth" type="date" placeholder="아이 생년월일" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:16px;font-size:14px;outline:none;background:var(--card);color:var(--sub);">
+          <input id="reg-email" type="email" placeholder="이메일" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:10px;font-size:16px;outline:none;background:var(--card);-webkit-user-select:text;user-select:text;touch-action:auto;-webkit-appearance:none;">
+          <input id="reg-nick" type="text" placeholder="닉네임 (예: 하은맘)" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:10px;font-size:16px;outline:none;background:var(--card);-webkit-user-select:text;user-select:text;touch-action:auto;-webkit-appearance:none;">
+          <input id="reg-pass" type="password" placeholder="비밀번호 (6자 이상)" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:10px;font-size:16px;outline:none;background:var(--card);-webkit-user-select:text;user-select:text;touch-action:auto;-webkit-appearance:none;">
+          <input id="reg-child-birth" type="date" placeholder="아이 생년월일" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:16px;font-size:16px;outline:none;background:var(--card);color:var(--sub);-webkit-user-select:text;user-select:text;touch-action:auto;-webkit-appearance:none;">
           <div id="reg-error" style="color:#e74c3c;font-size:12px;margin-bottom:10px;display:none;text-align:center;"></div>
           <button id="auth-register-btn" style="width:100%;padding:14px;background:var(--pri);color:#fff;border:none;border-radius:var(--r-md);font-size:15px;font-weight:600;cursor:pointer;">회원가입</button>
           <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--sub);">
