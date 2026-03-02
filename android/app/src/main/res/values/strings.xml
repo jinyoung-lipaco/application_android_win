@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">소행성</string>
+    <string name="host_name">jinyoung-lipaco.github.io</string>
+    <string name="default_url">https://jinyoung-lipaco.github.io/kjt_cowork/prototype.html</string>
+    <string name="asset_statements">
+        [{
+            \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+            \"target\": {
+                \"namespace\": \"web\",
+                \"site\": \"https://jinyoung-lipaco.github.io\"
+            }
+        }]
+    </string>
+</resources>

@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  api:
+    build: ./backend
+    container_name: sohaengsung-api
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=sohaengsung
+      - DB_USER=postgres
+      - DB_PASS=postgres123
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=sohaengsung-jwt-secret-dev-2024
+      - JWT_EXPIRES_IN=7d
+      - UPLOAD_DIR=/app/uploads
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    container_name: sohaengsung-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=sohaengsung
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: sohaengsung-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+volumes:
+  pgdata:
+  redisdata:
+  uploads:

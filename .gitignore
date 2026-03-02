@@ -1,0 +1,12 @@
+node_modules/
+.env
+backend/uploads/*
+!backend/uploads/.gitkeep
+*.apk
+*.keystore
+.gradle/
+build/
+local.properties
+android/.gradle/
+android/app/build/
+android/build/
