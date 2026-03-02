@@ -34,13 +34,13 @@ android {
         }
         docker {
             dimension "environment"
-            // Local network IP for real phone testing
-            buildConfigField "String", "DEFAULT_URL", "\"http://172.30.1.20:4000/prototype.html\""
+            // Cloudflare Tunnel public URL for remote testing
+            buildConfigField "String", "DEFAULT_URL", "\"https://gerald-cooperation-separate-dolls.trycloudflare.com/prototype.html\""
             manifestPlaceholders = [
-                hostName    : "172.30.1.20",
-                defaultUrl  : "http://172.30.1.20:4000/prototype.html",
+                hostName    : "gerald-cooperation-separate-dolls.trycloudflare.com",
+                defaultUrl  : "https://gerald-cooperation-separate-dolls.trycloudflare.com/prototype.html",
                 launcherName: "소행성",
-                assetStatements: '[{ "relation": ["delegate_permission/common.handle_all_urls"], "target": { "namespace": "web", "site": "http://172.30.1.20:4000" } }]'
+                assetStatements: '[{ "relation": ["delegate_permission/common.handle_all_urls"], "target": { "namespace": "web", "site": "https://gerald-cooperation-separate-dolls.trycloudflare.com" } }]'
             ]
         }
     }

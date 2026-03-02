@@ -2,76 +2,134 @@ package com.sohaengsung.app;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
-
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.browser.customtabs.CustomTabsService;
-import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
-
-import java.util.List;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.webkit.CookieManager;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 public class LauncherActivity extends Activity {
 
-    private static final String TAG = "TWALauncher";
-    // Default: GitHub Pages. Override with BuildConfig for Docker backend.
-    // For local Docker: "http://<your-pc-ip>:4000/prototype.html"
     private static final String TARGET_URL = BuildConfig.DEFAULT_URL;
+    private WebView webView;
+    private ValueCallback<Uri[]> fileCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        try {
-            // Try Custom Tabs first (works even without full TWA support)
-            String chromePackage = findCustomTabsProvider();
+        // Full-screen, no title bar
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
+        );
 
-            if (chromePackage != null) {
-                // Launch with Custom Tabs
-                CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-                builder.setShowTitle(false);
-                builder.setUrlBarHidingEnabled(true);
-                CustomTabsIntent customTabsIntent = builder.build();
-                customTabsIntent.intent.setPackage(chromePackage);
-                customTabsIntent.launchUrl(this, Uri.parse(TARGET_URL));
-            } else {
-                // Fallback: open in any browser
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(TARGET_URL));
-                startActivity(browserIntent);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to launch TWA", e);
-            // Ultimate fallback
-            try {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(TARGET_URL));
-                startActivity(browserIntent);
-            } catch (Exception e2) {
-                Log.e(TAG, "Failed to open browser", e2);
+        // Status bar color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().setStatusBarColor(Color.parseColor("#FAF6F1"));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                );
             }
         }
 
-        finish();
+        // Create WebView
+        webView = new WebView(this);
+        setContentView(webView);
+
+        // WebView settings
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setDatabaseEnabled(true);
+        settings.setAllowFileAccess(true);
+        settings.setMediaPlaybackRequiresUserGesture(false);
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        settings.setUserAgentString(settings.getUserAgentString() + " SohaengsungApp/2.0");
+
+        // Enable cookies
+        CookieManager.getInstance().setAcceptCookie(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+        }
+
+        // Handle navigation inside WebView
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                String url = request.getUrl().toString();
+                // Keep app URLs in WebView, open external links in browser
+                if (url.contains("172.30.") || url.contains("localhost") ||
+                    url.contains("jinyoung-lipaco.github.io") || url.contains("10.0.2.2") ||
+                    url.contains("trycloudflare.com")) {
+                    return false; // Load in WebView
+                }
+                // External links open in browser
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+                return true;
+            }
+        });
+
+        // Handle file input, alerts, etc.
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> callback,
+                                             FileChooserParams params) {
+                fileCallback = callback;
+                Intent intent = params.createIntent();
+                startActivityForResult(intent, 100);
+                return true;
+            }
+        });
+
+        // Load the app
+        webView.loadUrl(TARGET_URL);
     }
 
-    private String findCustomTabsProvider() {
-        PackageManager pm = getPackageManager();
-        Intent serviceIntent = new Intent();
-        serviceIntent.setAction(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
-
-        List<ResolveInfo> resolveInfos = pm.queryIntentServices(serviceIntent, 0);
-        if (resolveInfos != null && !resolveInfos.isEmpty()) {
-            // Prefer Chrome
-            for (ResolveInfo info : resolveInfos) {
-                if ("com.android.chrome".equals(info.serviceInfo.packageName)) {
-                    return "com.android.chrome";
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 100 && fileCallback != null) {
+            Uri[] results = null;
+            if (resultCode == RESULT_OK && data != null) {
+                String dataString = data.getDataString();
+                if (dataString != null) {
+                    results = new Uri[]{Uri.parse(dataString)};
                 }
             }
-            // Return first available
-            return resolveInfos.get(0).serviceInfo.packageName;
+            fileCallback.onReceiveValue(results);
+            fileCallback = null;
         }
-        return null;
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (webView != null && webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (webView != null) {
+            webView.destroy();
+        }
+        super.onDestroy();
     }
 }

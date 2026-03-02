@@ -6835,24 +6835,32 @@ if('serviceWorker' in navigator){
 
   function showAuthScreen() {
     document.getElementById('s-auth').style.display = 'block';
-    document.querySelectorAll('.screen:not(#s-auth)').forEach(s => s.style.display = 'none');
     const nav = document.querySelector('.bottom-nav');
     if (nav) nav.style.display = 'none';
     const hdr = document.querySelector('.app-header');
     if (hdr) hdr.style.display = 'none';
     const sb = document.querySelector('.status-bar');
     if (sb) sb.style.display = 'none';
+    const fab = document.getElementById('fabWrite');
+    if (fab) fab.style.display = 'none';
   }
 
   function hideAuthScreen() {
     document.getElementById('s-auth').style.display = 'none';
+    // Also hide onboarding if visible
+    const ob = document.getElementById('onboarding');
+    if (ob) ob.style.display = 'none';
     const nav = document.querySelector('.bottom-nav');
     if (nav) nav.style.display = '';
     const hdr = document.querySelector('.app-header');
     if (hdr) hdr.style.display = '';
     const sb = document.querySelector('.status-bar');
     if (sb) sb.style.display = '';
-    if (typeof showScreen === 'function') showScreen('s-home');
+    // Use goTab which manages CSS classes properly
+    if (typeof goTab === 'function') {
+      const navBtn = document.querySelector('.nav-btn');
+      goTab('s-community', navBtn);
+    }
   }
 
   // Initialize
