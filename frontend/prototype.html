@@ -6734,49 +6734,238 @@ if('serviceWorker' in navigator){
     if (stored) currentUser = JSON.parse(stored);
   }
 
-  // ─── Auth Screen ───
+  // ─── Auth Screen (3-step: Welcome → Options → Form) ───
   function createAuthScreen() {
     const el = document.createElement('div');
     el.id = 's-auth';
     el.className = 'screen';
-    el.style.cssText = 'display:none;background:var(--bg);position:fixed;inset:0;z-index:9999;pointer-events:auto;overflow-y:auto;';
+    el.style.cssText = 'display:none;background:#FAF6F1;position:fixed;inset:0;z-index:9999;pointer-events:auto;overflow-y:auto;';
+    const inputCSS = 'width:100%;padding:14px 16px;border:1.5px solid #E8DFD5;border-radius:12px;margin-bottom:10px;font-size:16px;outline:none;background:#fff;-webkit-user-select:text;user-select:text;touch-action:auto;-webkit-appearance:none;box-sizing:border-box;';
     el.innerHTML = `
-      <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;">
-        <div style="font-size:48px;margin-bottom:8px;">☄️</div>
-        <div style="font-size:24px;font-weight:900;color:var(--pri);margin-bottom:4px;">소행성</div>
-        <div style="font-size:13px;color:var(--sub);margin-bottom:32px;">엄마들이 함께 만들어가는 육아 커뮤니티</div>
+      <style>
+        .auth-step{position:absolute;inset:0;display:flex;flex-direction:column;transition:transform .4s ease,opacity .3s;overflow-y:auto;}
+        .auth-step.hide-left{transform:translateX(-100%);opacity:0;pointer-events:none;}
+        .auth-step.hide-right{transform:translateX(100%);opacity:0;pointer-events:none;}
+        .auth-step.show{transform:translateX(0);opacity:1;pointer-events:auto;}
+        .auth-btn{width:100%;padding:15px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-sizing:border-box;border:1.5px solid #E8DFD5;background:#fff;color:#333;margin-bottom:10px;transition:transform .1s;}
+        .auth-btn:active{transform:scale(0.98);}
+        .auth-btn-kakao{background:#FEE500;border-color:#FEE500;color:#3C1E1E;}
+        .auth-btn-google{background:#fff;border-color:#ddd;}
+        .auth-btn-phone{background:#fff;border-color:#ddd;}
+        .auth-btn-email{background:var(--pri);border-color:var(--pri);color:#fff;}
+        .auth-btn-primary{background:var(--pri);border-color:var(--pri);color:#fff;border:none;}
+        .auth-link{font-size:13px;color:#999;cursor:pointer;padding:8px;}
+        .auth-link b{color:var(--pri);font-weight:700;}
+        .auth-back{position:absolute;top:16px;left:16px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;z-index:10;color:#666;border-radius:50%;background:rgba(255,255,255,0.8);}
+      </style>
 
-        <div id="auth-login-form" style="width:100%;max-width:320px;">
-          <input id="auth-email" type="email" placeholder="이메일" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:10px;font-size:16px;outline:none;background:var(--card);-webkit-user-select:text;user-select:text;touch-action:auto;-webkit-appearance:none;">
-          <input id="auth-pass" type="password" placeholder="비밀번호" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:16px;font-size:16px;outline:none;background:var(--card);-webkit-user-select:text;user-select:text;touch-action:auto;-webkit-appearance:none;">
-          <div id="auth-error" style="color:#e74c3c;font-size:12px;margin-bottom:10px;display:none;text-align:center;"></div>
-          <button id="auth-login-btn" style="width:100%;padding:14px;background:var(--pri);color:#fff;border:none;border-radius:var(--r-md);font-size:15px;font-weight:600;cursor:pointer;">로그인</button>
-          <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--sub);">
-            계정이 없으신가요? <span id="auth-show-register" style="color:var(--pri);font-weight:600;cursor:pointer;">회원가입</span>
+      <!-- Step 1: Welcome -->
+      <div id="auth-step-welcome" class="auth-step show">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;">
+          <div style="width:120px;height:120px;border-radius:30px;background:linear-gradient(135deg,#1B1464,#2D1B69);display:flex;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 8px 32px rgba(27,20,100,0.3);">
+            <span style="font-size:56px;">☄️</span>
           </div>
-          <div style="text-align:center;margin-top:12px;">
-            <span id="auth-skip" style="font-size:12px;color:var(--sub);cursor:pointer;text-decoration:underline;">둘러보기 (로그인 없이)</span>
+          <div style="font-size:28px;font-weight:900;color:var(--pri);margin-bottom:8px;letter-spacing:-0.5px;">소행성</div>
+          <div style="font-size:18px;font-weight:700;color:#333;line-height:1.5;margin-bottom:8px;">
+            광활한 육아라는 우주 속에서,<br>
+            아이라는 기적을 만난<br>
+            당신을 환영해요
+          </div>
+          <div style="font-size:14px;color:#999;line-height:1.6;margin-bottom:40px;">
+            같은 하늘 아래 엄마들이<br>서로 별이 되어주는 곳
+          </div>
+          <button class="auth-btn auth-btn-primary" onclick="authGoStep('options')" style="max-width:300px;padding:16px;font-size:16px;">
+            시작하기
+          </button>
+          <div style="margin-top:16px;">
+            <span class="auth-link" onclick="authGoStep('login')">이미 계정이 있으신가요? <b>로그인</b></span>
           </div>
         </div>
+      </div>
 
-        <div id="auth-register-form" style="width:100%;max-width:320px;display:none;">
-          <input id="reg-email" type="email" placeholder="이메일" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:10px;font-size:16px;outline:none;background:var(--card);-webkit-user-select:text;user-select:text;touch-action:auto;-webkit-appearance:none;">
-          <input id="reg-nick" type="text" placeholder="닉네임 (예: 하은맘)" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:10px;font-size:16px;outline:none;background:var(--card);-webkit-user-select:text;user-select:text;touch-action:auto;-webkit-appearance:none;">
-          <input id="reg-pass" type="password" placeholder="비밀번호 (6자 이상)" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:10px;font-size:16px;outline:none;background:var(--card);-webkit-user-select:text;user-select:text;touch-action:auto;-webkit-appearance:none;">
-          <input id="reg-child-birth" type="date" placeholder="아이 생년월일" style="width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);margin-bottom:16px;font-size:16px;outline:none;background:var(--card);color:var(--sub);-webkit-user-select:text;user-select:text;touch-action:auto;-webkit-appearance:none;">
-          <div id="reg-error" style="color:#e74c3c;font-size:12px;margin-bottom:10px;display:none;text-align:center;"></div>
-          <button id="auth-register-btn" style="width:100%;padding:14px;background:var(--pri);color:#fff;border:none;border-radius:var(--r-md);font-size:15px;font-weight:600;cursor:pointer;">회원가입</button>
-          <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--sub);">
-            이미 계정이 있으신가요? <span id="auth-show-login" style="color:var(--pri);font-weight:600;cursor:pointer;">로그인</span>
+      <!-- Step 2: Sign Up Options -->
+      <div id="auth-step-options" class="auth-step hide-right">
+        <div class="auth-back" onclick="authGoStep('welcome')">←</div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;">
+          <div style="width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#E8F4FF,#FFF0E8);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+            <span style="font-size:52px;">👶</span>
+          </div>
+          <div style="font-size:24px;font-weight:900;color:#333;margin-bottom:32px;">소행성</div>
+          <div style="background:#FFF8F0;border-radius:20px;padding:8px 20px;margin-bottom:24px;display:inline-flex;align-items:center;gap:6px;">
+            <span style="font-size:14px;">⚡</span>
+            <span style="font-size:13px;font-weight:600;color:#B8860B;">2초만에 빠른 회원가입</span>
+          </div>
+          <div style="width:100%;max-width:320px;">
+            <button class="auth-btn auth-btn-kakao" onclick="authSocialLogin('kakao')">
+              <span style="font-size:18px;">💬</span> 카카오로 시작하기
+            </button>
+            <button class="auth-btn auth-btn-phone" onclick="authGoStep('phone')">
+              <span style="font-size:18px;">📱</span> 휴대폰 번호로 시작하기
+            </button>
+            <button class="auth-btn auth-btn-google" onclick="authSocialLogin('google')">
+              <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+              구글로 시작하기
+            </button>
+            <button class="auth-btn auth-btn-email" onclick="authGoStep('register')">
+              <span style="font-size:16px;">✉️</span> 이메일로 시작하기
+            </button>
+          </div>
+          <div style="margin-top:20px;display:flex;align-items:center;gap:16px;">
+            <span class="auth-link" onclick="authGoStep('login')"><b>로그인</b></span>
+            <span style="color:#ddd;">|</span>
+            <span class="auth-link" onclick="authGoStep('contact')"><b>문의하기</b></span>
           </div>
         </div>
+      </div>
 
-        <div style="margin-top:32px;font-size:11px;color:var(--sub);">테스트 계정: haeun@test.com / test1234</div>
+      <!-- Step 3a: Email Register -->
+      <div id="auth-step-register" class="auth-step hide-right">
+        <div class="auth-back" onclick="authGoStep('options')">←</div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;">
+          <div style="font-size:22px;font-weight:900;color:#333;margin-bottom:6px;">이메일로 회원가입</div>
+          <div style="font-size:13px;color:#999;margin-bottom:28px;">간단한 정보만 입력하면 바로 시작!</div>
+          <div style="width:100%;max-width:320px;">
+            <input id="reg-email" type="email" placeholder="이메일 주소" style="${inputCSS}">
+            <input id="reg-nick" type="text" placeholder="닉네임 (예: 하은맘)" style="${inputCSS}">
+            <input id="reg-pass" type="password" placeholder="비밀번호 (6자 이상)" style="${inputCSS}">
+            <div style="font-size:12px;color:#999;margin-bottom:6px;padding-left:4px;">아이 생년월일 (선택)</div>
+            <input id="reg-child-birth" type="date" style="${inputCSS}margin-bottom:16px;color:#999;">
+            <div id="reg-error" style="color:#e74c3c;font-size:12px;margin-bottom:10px;display:none;text-align:center;"></div>
+            <button id="auth-register-btn" class="auth-btn auth-btn-primary" style="font-size:16px;padding:16px;">회원가입</button>
+            <div style="text-align:center;margin-top:14px;">
+              <span class="auth-link" onclick="authGoStep('login')">이미 계정이 있으신가요? <b>로그인</b></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3b: Email Login -->
+      <div id="auth-step-login" class="auth-step hide-right">
+        <div class="auth-back" onclick="authGoStep('options')">←</div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;">
+          <div style="font-size:40px;margin-bottom:12px;">☄️</div>
+          <div style="font-size:22px;font-weight:900;color:#333;margin-bottom:6px;">다시 오셨군요!</div>
+          <div style="font-size:13px;color:#999;margin-bottom:28px;">소행성이 기다리고 있었어요</div>
+          <div style="width:100%;max-width:320px;">
+            <input id="auth-email" type="email" placeholder="이메일 주소" style="${inputCSS}">
+            <input id="auth-pass" type="password" placeholder="비밀번호" style="${inputCSS}margin-bottom:16px;">
+            <div id="auth-error" style="color:#e74c3c;font-size:12px;margin-bottom:10px;display:none;text-align:center;"></div>
+            <button id="auth-login-btn" class="auth-btn auth-btn-primary" style="font-size:16px;padding:16px;">로그인</button>
+            <div style="text-align:center;margin-top:14px;">
+              <span class="auth-link" onclick="authGoStep('register')">계정이 없으신가요? <b>회원가입</b></span>
+            </div>
+            <div style="text-align:center;margin-top:8px;">
+              <span class="auth-link" style="font-size:12px;text-decoration:underline;" onclick="hideAuthScreen()">둘러보기 (로그인 없이)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3c: Phone Register -->
+      <div id="auth-step-phone" class="auth-step hide-right">
+        <div class="auth-back" onclick="authGoStep('options')">←</div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;">
+          <div style="font-size:40px;margin-bottom:12px;">📱</div>
+          <div style="font-size:22px;font-weight:900;color:#333;margin-bottom:6px;">휴대폰 번호로 시작</div>
+          <div style="font-size:13px;color:#999;margin-bottom:28px;">인증번호를 보내드릴게요</div>
+          <div style="width:100%;max-width:320px;">
+            <div style="display:flex;gap:8px;margin-bottom:10px;">
+              <input id="phone-number" type="tel" placeholder="010-0000-0000" style="${inputCSS}margin-bottom:0;flex:1;">
+              <button id="phone-send-btn" class="auth-btn" onclick="authSendCode()" style="width:100px;margin-bottom:0;padding:14px 0;font-size:13px;background:var(--pri);color:#fff;border-color:var(--pri);">인증요청</button>
+            </div>
+            <input id="phone-code" type="number" placeholder="인증번호 6자리" style="${inputCSS}margin-bottom:6px;" disabled>
+            <div id="phone-timer" style="font-size:12px;color:var(--pri);text-align:right;margin-bottom:10px;display:none;">03:00</div>
+            <input id="phone-nick" type="text" placeholder="닉네임 (예: 하은맘)" style="${inputCSS}">
+            <div id="phone-error" style="color:#e74c3c;font-size:12px;margin-bottom:10px;display:none;text-align:center;"></div>
+            <button id="phone-register-btn" class="auth-btn auth-btn-primary" style="font-size:16px;padding:16px;" onclick="authPhoneRegister()">가입 완료</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step: Contact -->
+      <div id="auth-step-contact" class="auth-step hide-right">
+        <div class="auth-back" onclick="authGoStep('options')">←</div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;">
+          <div style="font-size:40px;margin-bottom:12px;">💌</div>
+          <div style="font-size:22px;font-weight:900;color:#333;margin-bottom:8px;">문의하기</div>
+          <div style="font-size:14px;color:#999;line-height:1.7;margin-bottom:24px;">
+            서비스 이용에 문제가 있으시면<br>아래 이메일로 문의해주세요
+          </div>
+          <div style="background:#fff;padding:16px 24px;border-radius:12px;border:1.5px solid #E8DFD5;font-size:15px;font-weight:600;color:var(--pri);">
+            support@sohaengsung.com
+          </div>
+          <div style="margin-top:24px;">
+            <button class="auth-btn auth-btn-primary" onclick="authGoStep('options')" style="max-width:200px;padding:14px 40px;">돌아가기</button>
+          </div>
+        </div>
       </div>
     `;
     document.querySelector('.app').prepend(el);
 
-    // Event handlers
+    // ── Step navigation ──
+    let currentAuthStep = 'welcome';
+    window.authGoStep = function(step) {
+      const steps = ['welcome','options','register','login','phone','contact'];
+      const oldIdx = steps.indexOf(currentAuthStep);
+      const newIdx = steps.indexOf(step);
+      steps.forEach(s => {
+        const panel = document.getElementById('auth-step-' + s);
+        if (!panel) return;
+        if (s === step) {
+          panel.className = 'auth-step show';
+        } else {
+          panel.className = 'auth-step ' + (steps.indexOf(s) < newIdx ? 'hide-left' : 'hide-right');
+        }
+      });
+      currentAuthStep = step;
+    };
+
+    // ── Social login handlers ──
+    window.authSocialLogin = function(provider) {
+      if (provider === 'kakao') {
+        alert('카카오 로그인은 준비 중입니다.\n이메일로 먼저 시작해주세요!');
+      } else if (provider === 'google') {
+        alert('구글 로그인은 준비 중입니다.\n이메일로 먼저 시작해주세요!');
+      }
+    };
+
+    // ── Phone auth handlers ──
+    let phoneTimer = null;
+    let phoneVerified = false;
+    window.authSendCode = function() {
+      const phone = document.getElementById('phone-number').value.replace(/[^0-9]/g,'');
+      if (phone.length < 10) { document.getElementById('phone-error').textContent='올바른 전화번호를 입력해주세요'; document.getElementById('phone-error').style.display='block'; return; }
+      document.getElementById('phone-error').style.display='none';
+      document.getElementById('phone-code').disabled = false;
+      document.getElementById('phone-code').focus();
+      document.getElementById('phone-send-btn').textContent = '재발송';
+      document.getElementById('phone-timer').style.display = 'block';
+      let sec = 180;
+      clearInterval(phoneTimer);
+      phoneTimer = setInterval(() => {
+        sec--;
+        const m = Math.floor(sec/60), s = sec%60;
+        document.getElementById('phone-timer').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+        if (sec <= 0) { clearInterval(phoneTimer); document.getElementById('phone-timer').textContent = '시간 만료'; }
+      }, 1000);
+      phoneVerified = true; // For demo: auto-verify
+    };
+    window.authPhoneRegister = async function() {
+      const phone = document.getElementById('phone-number').value.replace(/[^0-9]/g,'');
+      const nick = document.getElementById('phone-nick').value.trim();
+      const errEl = document.getElementById('phone-error');
+      if (!phone || phone.length < 10) { errEl.textContent='전화번호를 입력해주세요'; errEl.style.display='block'; return; }
+      if (!nick) { errEl.textContent='닉네임을 입력해주세요'; errEl.style.display='block'; return; }
+      errEl.style.display='none';
+      // Register with phone as email (phone@sohaengsung.com)
+      const email = phone + '@phone.sohaengsung.com';
+      const password = 'phone_' + phone;
+      const result = await api.register({ email, password, nickname: nick });
+      if (result) { hideAuthScreen(); }
+      else { errEl.textContent='가입에 실패했습니다. 다시 시도해주세요.'; errEl.style.display='block'; }
+    };
+
+    // ── Email login ──
     document.getElementById('auth-login-btn').addEventListener('click', async () => {
       const email = document.getElementById('auth-email').value;
       const pass = document.getElementById('auth-pass').value;
@@ -6785,52 +6974,31 @@ if('serviceWorker' in navigator){
       const btn = document.getElementById('auth-login-btn');
       btn.textContent = '로그인 중...'; btn.disabled = true;
       const result = await api.login(email, pass);
-      if (result) {
-        hideAuthScreen();
-      } else {
-        errEl.textContent = '로그인에 실패했습니다. 서버가 꺼져있거나 계정 정보를 확인해주세요.';
-        errEl.style.display = 'block';
-      }
+      if (result) { hideAuthScreen(); }
+      else { errEl.textContent = '이메일 또는 비밀번호가 올바르지 않습니다.'; errEl.style.display = 'block'; }
       btn.textContent = '로그인'; btn.disabled = false;
     });
 
+    // ── Email register ──
     document.getElementById('auth-register-btn').addEventListener('click', async () => {
       const email = document.getElementById('reg-email').value;
       const nickname = document.getElementById('reg-nick').value;
       const password = document.getElementById('reg-pass').value;
       const childBirthDate = document.getElementById('reg-child-birth').value;
       const errEl = document.getElementById('reg-error');
-      if (!email || !nickname || !password) { errEl.textContent = '모든 필수 항목을 입력해주세요'; errEl.style.display = 'block'; return; }
+      if (!email || !nickname || !password) { errEl.textContent = '필수 항목을 모두 입력해주세요'; errEl.style.display = 'block'; return; }
       if (password.length < 6) { errEl.textContent = '비밀번호는 6자 이상이어야 합니다'; errEl.style.display = 'block'; return; }
       const btn = document.getElementById('auth-register-btn');
       btn.textContent = '가입 중...'; btn.disabled = true;
       const result = await api.register({ email, password, nickname, childBirthDate });
-      if (result) {
-        hideAuthScreen();
-      } else {
-        errEl.textContent = '회원가입에 실패했습니다. 이메일 또는 닉네임이 이미 사용 중일 수 있습니다.';
-        errEl.style.display = 'block';
-      }
+      if (result) { hideAuthScreen(); }
+      else { errEl.textContent = '이미 사용 중인 이메일 또는 닉네임입니다.'; errEl.style.display = 'block'; }
       btn.textContent = '회원가입'; btn.disabled = false;
     });
 
-    document.getElementById('auth-show-register').addEventListener('click', () => {
-      document.getElementById('auth-login-form').style.display = 'none';
-      document.getElementById('auth-register-form').style.display = 'block';
-    });
-
-    document.getElementById('auth-show-login').addEventListener('click', () => {
-      document.getElementById('auth-register-form').style.display = 'none';
-      document.getElementById('auth-login-form').style.display = 'block';
-    });
-
-    document.getElementById('auth-skip').addEventListener('click', () => {
-      hideAuthScreen();
-    });
-
-    // Enter key support
+    // Enter key
     document.getElementById('auth-pass').addEventListener('keyup', e => { if (e.key === 'Enter') document.getElementById('auth-login-btn').click(); });
-    document.getElementById('reg-child-birth').addEventListener('keyup', e => { if (e.key === 'Enter') document.getElementById('auth-register-btn').click(); });
+    document.getElementById('reg-pass').addEventListener('keyup', e => { if (e.key === 'Enter') document.getElementById('auth-register-btn').click(); });
   }
 
   function showAuthScreen() {
